@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "couse"
+version = "0.1.0"
+description = ""
+authors = ["Gleb Mikloshevich <glebmikloshevich@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+ultralytics = "^8.2.27"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
