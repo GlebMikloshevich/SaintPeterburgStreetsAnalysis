@@ -1,12 +1,10 @@
 from ultralytics import YOLO
 import numpy as np
-from PIL import Image
 from collections import Counter
 
-
 class Detector:
-    def __init__(self, weigh_path: str = "./weights/yolov8.pt"):
-        self.model = YOLO(weigh_path)
+    def __init__(self, weight_path: str = "./weights/yolov8.pt"):
+        self.model = YOLO(weight_path)
         self.target_classes = ("person", "car", "motorcycle", "bus", "truck", "boat", "dog", "horse")
         self.names = self.model.names
 
@@ -15,7 +13,6 @@ class Detector:
         prediction = self.model.predict(image)
         bboxes = {}
 
-        # there is an easier way
         for pred in prediction[0]:
             cls_label = self.names[int(pred.boxes.cls.numpy()[0])]
             labels[cls_label] += 1
@@ -33,10 +30,3 @@ class Detector:
     @staticmethod
     def to_int_bbox(bbox: np.array) -> np.array:
         return np.round(bbox).astype(int)
-
-
-if __name__ == "__main__":
-    img = np.array(Image.open("./weights/street.jpeg"))
-    det = Detector("/home/gleb/PycharmProjects/couse/weights/yolov8n.pt")
-    res = det(img)
-    print(res)
