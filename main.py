@@ -13,8 +13,8 @@ if __name__ == "__main__":
 
     with ThreadPoolExecutor(max_workers=len(cameras)) as executor:
         futures = [
-            executor.submit(image_capture.handle_camera, camera_name, video_id, capture_interval)
-            for camera_name, video_id in cameras.items()
+            executor.submit(image_capture.handle_camera, camera_name, camera_params, capture_interval)
+            for camera_name, camera_params in cameras.items()
         ]
 
     try:

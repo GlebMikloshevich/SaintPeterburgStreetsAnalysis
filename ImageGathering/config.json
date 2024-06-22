@@ -1,12 +1,33 @@
 {
     "cameras": {
-        "Bogatyrsky ave": "ZlDohRExM-A",
-        "Nevskiy": "8xvDwLqW2Aw",
-        "Commandant's square": "rmStl3GF2Ds",
-        "Griboedov Canal": "-gAWu4bOvHQ",
-        "Prosveshenia ave": "7nTiIAruZvo",
-        "Science ave": "J-Sm-hHTiQ4",
-        "Rubinstein Street": "ybllmr12xXk"
+        "Bogatyrsky ave": {
+            "url": "ZlDohRExM-A",
+            "crop_bbox": [300, 320, 1200, 720]
+        },
+        "Nevskiy": {
+            "url":"8xvDwLqW2Aw",
+            "crop_bbox": [0, 300, 750, 650]
+        },
+        "Commandant's square": {
+            "url":"rmStl3GF2Ds",
+            "crop_bbox": [150, 300, 1620, 1080]
+        },
+        "Griboedov Canal": {
+            "url": "-gAWu4bOvHQ",
+            "crop_bbox": [0, 200, 1150, 650]
+        },
+        "Prosveshenia ave": {
+            "url":"7nTiIAruZvo",
+            "crop_bbox": [60, 220, 1400, 800]
+        },
+        "Science ave": {
+            "url":"J-Sm-hHTiQ4",
+            "crop_bbox": [0, 300, 1680, 1080]
+        },
+        "Rubinstein Street": {
+            "url":"ybllmr12xXk",
+            "crop_bbox": [1000, 50, 1800, 1080]
+        }
     },
     "capture_interval": 1
 }
