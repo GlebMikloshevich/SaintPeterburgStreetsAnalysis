@@ -35,7 +35,7 @@ class Detector:
         for label, bboxes_list in yolo_result["bboxes"].items():
             for i, bbox in enumerate(bboxes_list):
                 bboxes_list[i] = [bbox[0] + dx, bbox[1] + dy, bbox[2] + dx, bbox[3] + dy]
-        return yolo_result, cropped_pil
+        return yolo_result
 
     def __call__(self, *args, **kwargs):
         return self.predict(*args, **kwargs)

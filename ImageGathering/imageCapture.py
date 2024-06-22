@@ -21,7 +21,7 @@ class ImageCapture:
             raise RuntimeError(f"Не удалось получить URL потока для видео {video_id}")
         return stream_url
 
-    def process_video_stream(self, camera_name, stream_url, capture_interval):
+    def process_video_stream(self, camera_name, camera_params, stream_url, capture_interval):
         cap = cv2.VideoCapture(stream_url)
         if not cap.isOpened():
             print(f"Не удалось открыть поток {stream_url} для камеры {camera_name}")
@@ -37,14 +37,14 @@ class ImageCapture:
             current_time = time.time()
             if current_time - last_capture_time >= capture_interval * 60:
                 last_capture_time = current_time
-                self.save_frame_and_process(camera_name, frame)
+                self.save_frame_and_process(camera_name, camera_params, frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
         cap.release()
 
-    def save_frame_and_process(self, camera_name, frame):
+    def save_frame_and_process(self, camera_name, camera_params, frame):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         directory = f"data/{camera_name}"
         if not os.path.exists(directory):
@@ -54,16 +54,17 @@ class ImageCapture:
         print(f"Скриншот сохранен как {filename}")
 
         # Обработка кадра через YOLO
-        results = self.detector(frame)
+        results = self.detector.crop_predict(frame, camera_params["crop_bbox"])
         print(f"Результаты обработки для {camera_name}:", results)
-
-        # Преобразование numpy массивов в списки для сериализации в JSON
-        results_serializable = {
-            "timestamp": timestamp,
-            "labels": results["labels"],
-            "bboxes": {k: [bbox.tolist() for bbox in v] for k, v in results["bboxes"].items()}
-        }
-
+        try:
+            # Преобразование numpy массивов в списки для сериализации в JSON
+            results_serializable = {
+                "timestamp": timestamp,
+                "labels": results["labels"],
+                "bboxes": {k: [bbox.tolist() for bbox in v] for k, v in results["bboxes"].items()}
+            }
+        except:
+            a = 1
         # Путь к JSON-файлу
         results_filename = os.path.join(directory, f"{camera_name}_results.json")
 
@@ -82,12 +83,12 @@ class ImageCapture:
             json.dump(existing_results, f, indent=4)
         print(f"Результаты обработки сохранены как {results_filename}")
 
-    def handle_camera(self, camera_name, video_id, capture_interval):
+    def handle_camera(self, camera_name, camera_params, capture_interval):
         try:
             print(f"Получение URL потока для {camera_name}...")
-            stream_url = self.get_youtube_live_url(video_id)
+            stream_url = self.get_youtube_live_url(camera_params["url"])
 
             print(f"Обработка видеопотока для {camera_name}...")
-            self.process_video_stream(camera_name, stream_url, capture_interval)
+            self.process_video_stream(camera_name, camera_params, stream_url, capture_interval)
         except RuntimeError as e:
             print(e)
