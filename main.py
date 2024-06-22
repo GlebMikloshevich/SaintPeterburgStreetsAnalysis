@@ -1,15 +1,15 @@
 import json
 from concurrent.futures import ThreadPoolExecutor
-from imageCapture import ImageCapture
+from ImageGathering.imageCapture import ImageCapture
 
 if __name__ == "__main__":
-    with open('config.json', 'r') as f:
+    with open('ImageGathering/config.json', 'r') as f:
         config = json.load(f)
 
     cameras = config["cameras"]
     capture_interval = config["capture_interval"]
 
-    image_capture = ImageCapture("/home/gleb/PycharmProjects/couse/weights/yolov8n.pt")
+    image_capture = ImageCapture("./ImageGathering/weights/yolov8n.pt")
 
     with ThreadPoolExecutor(max_workers=len(cameras)) as executor:
         futures = [

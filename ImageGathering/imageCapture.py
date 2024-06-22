@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 import os
 import json
-from Detector import Detector
+from ImageGathering.Detector import Detector
 
 class ImageCapture:
     def __init__(self, weight_path: str = "./weights/yolov8.pt"):
@@ -46,7 +46,7 @@ class ImageCapture:
 
     def save_frame_and_process(self, camera_name, frame):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        directory = f"{camera_name}"
+        directory = f"data/{camera_name}"
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = os.path.join(directory, f"{camera_name}_{timestamp}.jpg")
