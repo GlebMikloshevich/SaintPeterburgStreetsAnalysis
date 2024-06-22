@@ -15,6 +15,8 @@ class Detector:
 
         for pred in prediction[0]:
             cls_label = self.names[int(pred.boxes.cls.numpy()[0])]
+            if cls_label not in self.target_classes:
+                continue
             labels[cls_label] += 1
             int_bbox = self.to_int_bbox(pred.boxes.xyxy.numpy()[0])
             if cls_label in bboxes:
