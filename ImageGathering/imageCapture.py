@@ -56,15 +56,13 @@ class ImageCapture:
         # Обработка кадра через YOLO
         results = self.detector.crop_predict(frame, camera_params["crop_bbox"])
         print(f"Результаты обработки для {camera_name}:", results)
-        try:
-            # Преобразование numpy массивов в списки для сериализации в JSON
-            results_serializable = {
-                "timestamp": timestamp,
-                "labels": results["labels"],
-                "bboxes": {k: [bbox.tolist() for bbox in v] for k, v in results["bboxes"].items()}
-            }
-        except:
-            a = 1
+        # Преобразование numpy массивов в списки для сериализации в JSON
+        results_serializable = {
+            "timestamp": timestamp,
+            "labels": results["labels"],
+            "bboxes": {k: [bbox.tolist() for bbox in v] for k, v in results["bboxes"].items()}
+        }
+
         # Путь к JSON-файлу
         results_filename = os.path.join(directory, f"{camera_name}_results.json")
 
