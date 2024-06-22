@@ -3,6 +3,7 @@ import numpy as np
 from collections import Counter
 from PIL import Image
 
+
 class Detector:
     def __init__(self, weight_path: str = "./weights/yolov8.pt"):
         self.model = YOLO(weight_path)
@@ -27,7 +28,7 @@ class Detector:
 
         return {"labels": labels, "bboxes": bboxes}
 
-    def crop_predict(self, image: np.ndarray, crop_bbox: list[int]):
+    def crop_predict(self, image: np.ndarray, crop_bbox: list[int], *args, **kwargs):
         image_pil = Image.fromarray(image)
         cropped_pil = image_pil.crop(crop_bbox)
         dx, dy, _, _ = crop_bbox
@@ -37,7 +38,9 @@ class Detector:
                 bboxes_list[i] = [bbox[0] + dx, bbox[1] + dy, bbox[2] + dx, bbox[3] + dy]
         return yolo_result
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, image: np.array | Image.Image, bbox=None, *args, **kwargs):
+        if bbox is not None:
+            return self.crop_predict(image, bbox, *args, **kwargs)
         return self.predict(*args, **kwargs)
 
     @staticmethod
