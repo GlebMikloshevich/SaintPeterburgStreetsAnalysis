@@ -1,5 +1,4 @@
 import psycopg2
-from psycopg2.extras import execute_values
 from psycopg2.sql import Placeholder, SQL, Identifier
 import json
 from ImageGathering.db_module.db_config import dbname, user, password, host
@@ -97,5 +96,29 @@ def delete_results(camera_id=None, result_id=None):
         with conn.cursor() as cursor:
             cursor.execute(query, params)
             conn.commit()
+
+
+def get_camera_data():
+    query = SQL("SELECT url, street, crop_list, id FROM cameras")
+
+    try:
+        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+                camera_data = {}
+                for row in rows:
+                    url, street, crop_list, id = row
+                    camera_data[url] = {
+                        "street": street,
+                        "crop_list": crop_list,
+                        "camera_id": id
+                    }
+
+                return camera_data
+    except Exception as error:
+        print("Error fetching camera data:", error)
+        raise error
 
 
