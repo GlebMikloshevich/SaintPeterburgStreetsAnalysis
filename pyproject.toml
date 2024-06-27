@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "couse"
+name = "street analysis"
 version = "0.1.0"
 description = ""
 authors = ["Gleb Mikloshevich <glebmikloshevich@gmail.com>", "Alika Sarbassova <alika.sarbassova@gmail.com>"]
@@ -10,7 +10,12 @@ python = "^3.10"
 ultralytics = "^8.2.27"
 psycopg2 = "^2.9.9"
 yt-dlp = "^2024.5.27"
+pyspark = "^3.5.1"
+streamlit = "^1.36.0"
 
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.4"
 
 [build-system]
 requires = ["poetry-core"]
