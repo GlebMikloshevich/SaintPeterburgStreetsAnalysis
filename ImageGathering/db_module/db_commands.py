@@ -26,13 +26,15 @@ def insert_into_cameras(data):
         raise error
 
 
-def insert_into_results(data):
+def insert_into_results(data, insert_image: bool = False):
     columns = data.keys()
     values = [Placeholder(k) for k in columns]
 
     # Serialize the labels and bboxes fields
     data['labels'] = json.dumps(data['labels'])
     data['bboxes'] = json.dumps(data['bboxes'])
+    # if not insert_image:
+    #     data["image"] =
 
     query = SQL("INSERT INTO results ({}) VALUES ({}) RETURNING id").format(
         SQL(', ').join(map(Identifier, columns)),

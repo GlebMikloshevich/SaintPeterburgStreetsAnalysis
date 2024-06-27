@@ -4,7 +4,7 @@ from ImageGathering.imageCapture import ImageCapture
 
 from ImageGathering.db_module.db_commands import *
 
-CAPTURE_INTERVAL = 0.2
+CAPTURE_INTERVAL = 1
 
 if __name__ == "__main__":
     cameras = get_camera_data()

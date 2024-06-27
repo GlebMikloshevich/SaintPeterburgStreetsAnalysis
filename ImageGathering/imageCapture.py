@@ -63,7 +63,7 @@ class ImageCapture:
         if not os.path.exists(directory):
             os.makedirs(directory)
         filename = os.path.join(directory, f"{camera_params['street']}_{timestamp}.jpg")
-        cv2.imwrite(filename, frame)
+        # cv2.imwrite(filename, frame) # was used for the debug
         byte_image = self.convert_frame_to_bytes(frame)
         print(f"Скриншот сохранен как {filename}")
 
