@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 import json
 from ImageGathering.Detector import Detector
-from ImageGathering.db_module.db_commands import insert_into_results
+from ImageGathering.db_module.db_commands import insert_result
 
 
 class ImageCapture:
@@ -57,6 +57,7 @@ class ImageCapture:
         byte_array = buffer.tobytes()
 
         return byte_array
+
     def save_frame_and_process(self, camera_params, frame):
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         directory = f"data/{camera_params['street']}"
@@ -65,6 +66,7 @@ class ImageCapture:
         filename = os.path.join(directory, f"{camera_params['street']}_{timestamp}.jpg")
         # cv2.imwrite(filename, frame) # was used for the debug
         byte_image = self.convert_frame_to_bytes(frame)
+        byte_image = None  # TODO: move out
         print(f"Скриншот сохранен как {filename}")
 
         # Обработка кадра через YOLO
@@ -85,7 +87,7 @@ class ImageCapture:
             "camera_id": camera_params["camera_id"]
         }
 
-        result_id = insert_into_results(results_db)
+        result_id = insert_result(results_db)
         print(f"Inserted result with ID: {result_id}")
 
         # Путь к JSON-файлу

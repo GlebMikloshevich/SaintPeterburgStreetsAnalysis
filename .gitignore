@@ -2,4 +2,9 @@
 data
 ImageGathering/weights
 sandbox.py
+sandbox.ipynb
+test.py
+test.ipynb
 ImageGathering/__pycache__
+ImageGathering/db_module/__pycache__
+poetry.lock

@@ -1,59 +1,87 @@
-import psycopg2
-from psycopg2.sql import Placeholder, SQL, Identifier
 import json
-from ImageGathering.db_module.db_config import dbname, user, password, host
+import os
+from contextlib import contextmanager
+
+import psycopg2
+from psycopg2.sql import SQL, Identifier, Placeholder
+from psycopg2.pool import ThreadedConnectionPool
+from ImageGathering.db_module.db_config import dbname, host
 
 
-def insert_into_cameras(data):
-    columns = data.keys()
-    values = [Placeholder(k) for k in columns]
+dbpool = ThreadedConnectionPool(host=host,
+                                dbname=dbname,
+                                user=os.environ["db_user"],
+                                password=os.environ["db_password"],
+                                minconn=1,
+                                maxconn=1)
 
-    query = SQL("INSERT INTO cameras ({}) VALUES ({}) RETURNING id").format(
-        SQL(', ').join(map(Identifier, columns)),
-        SQL(', ').join(values)
-    )
 
+@contextmanager
+def db_cursor():
+    """provides a database cursor.
+    NOTE: It might fail if you exceed the maximum connections limit
+
+    Raises:
+        e: IDK,
+
+    Yields:
+        cursor (psycopg2.extensions.cursor): a db cursor
+    """
+    conn = dbpool.getconn()
     try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, data)
-                camera_id = cursor.fetchone()[0]
-                conn.commit()
-                return camera_id
-    except Exception as error:
-        print("Error adding camera:", error)
-        print("url, description:", data.get("url"), data.get("description"))
-        raise error
+        with conn.cursor() as cur:
+            yield cur
+            conn.commit()
+    except Exception as e:
+        conn.rollback()
+        raise e # NOTE: should I use logger.WARNING or ERROR messages instead of raise?
+    finally:
+        dbpool.putconn(conn)
 
 
-def insert_into_results(data, insert_image: bool = False):
+def insert_camera(data: dict) -> None:
     columns = data.keys()
     values = [Placeholder(k) for k in columns]
+    query = SQL("INSERT INTO cameras ({}) VALUES ({}) RETURNING id").format(
+        SQL(', ').join(map(Identifier, columns)), SQL(', ').join(values))
 
-    # Serialize the labels and bboxes fields
+    with db_cursor() as cursor:
+        cursor.execute(query, data)
+
+
+def insert_result(data: dict, save_image: bool = False):
+    columns = data.keys()
+    values = [Placeholder(k) for k in columns]
     data['labels'] = json.dumps(data['labels'])
     data['bboxes'] = json.dumps(data['bboxes'])
-    # if not insert_image:
-    #     data["image"] =
-
     query = SQL("INSERT INTO results ({}) VALUES ({}) RETURNING id").format(
         SQL(', ').join(map(Identifier, columns)),
         SQL(', ').join(values)
     )
-
-    try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query, data)
-                result_id = cursor.fetchone()[0]
-                conn.commit()
-                return result_id
-    except Exception as error:
-        print("Error adding result:", error)
-        print("camera_id, image:", data.get("camera_id"), data.get("image"))
-        raise error
+    print(data)
+    with db_cursor() as cursor:
+        cursor.execute(query, data)
 
 
+def get_cameras():
+    query = SQL("SELECT url, street, crop_list, id FROM cameras")
+    with db_cursor() as cursor:
+        cursor.execute(query)
+        rows = cursor.fetchall()
+    camera_data = {}
+    for row in rows:
+        url, street, crop_list, id = row
+        camera_data[url] = {
+            "street": street,
+            "crop_list": crop_list,
+            "camera_id": id
+        }
+
+    return camera_data
+
+
+# TODO remove delete_results command
+# TODO add autofetching new cameras, soft removing cameras with end_data url, and successor camera if available
 def delete_camera(url=None, camera_id=None):
     if not url and not camera_id:
         raise ValueError("Either 'url' or 'camera_id' must be provided.")
@@ -71,7 +99,8 @@ def delete_camera(url=None, camera_id=None):
         query += "id = %s;"
         params = [camera_id]
 
-    with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+    with psycopg2.connect(dbname=dbname, user=os.environ["db_user"],
+                          password=os.environ["db_password"], host=host) as conn:
         with conn.cursor() as cursor:
             cursor.execute(query, params)
             conn.commit()
@@ -94,33 +123,8 @@ def delete_results(camera_id=None, result_id=None):
         query += "id = %s;"
         params = [result_id]
 
-    with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
+    with psycopg2.connect(dbname=dbname, user=os.environ["db_user"],
+                          password=os.environ["db_password"], host=host) as conn:
         with conn.cursor() as cursor:
             cursor.execute(query, params)
             conn.commit()
-
-
-def get_camera_data():
-    query = SQL("SELECT url, street, crop_list, id FROM cameras")
-
-    try:
-        with psycopg2.connect(dbname=dbname, user=user, password=password, host=host) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(query)
-                rows = cursor.fetchall()
-
-                camera_data = {}
-                for row in rows:
-                    url, street, crop_list, id = row
-                    camera_data[url] = {
-                        "street": street,
-                        "crop_list": crop_list,
-                        "camera_id": id
-                    }
-
-                return camera_data
-    except Exception as error:
-        print("Error fetching camera data:", error)
-        raise error
-
-
